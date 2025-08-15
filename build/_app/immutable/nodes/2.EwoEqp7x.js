@@ -1,1 +1,0 @@
-import{f as a,a as r}from"../chunks/Belpmk6s.js";import"../chunks/CkRqGu_f.js";import{o as e}from"../chunks/BMEmbB23.js";var s=a('<h2>Editor</h2> <p class="test-2 svelte-yva3me">This is a test</p>',1);function n(t){var o=s();e(2),r(t,o)}export{n as component};
