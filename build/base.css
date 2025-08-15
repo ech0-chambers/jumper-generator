@@ -1,0 +1,74 @@
+* {
+    transition: 0.3s, position 0s, transform 0s;;
+}
+
+body {
+    background: var(--clr-background);
+    color: var(--clr-foreground);
+
+    /* Common Variables */
+
+    --border-radius-main: 0.5em;
+    --border-radius-small: 0.25em;
+    --border-width-thin: 1px;
+    --border-width-thick: 2px;
+    --gap-small: 0.5em;
+    --gap-medium: 1em;
+    --gap-large: 2em;
+    /* Fonts */
+    --font-family-main: 'sans-serif';
+    --font-family-title: 'serif';
+    --font-size-small: 0.875em;
+    --font-size-medium: 1em;
+    --font-size-large: 1.25em;
+    --font-size-huge: 1.5em;
+    --font-weight-normal: 400;
+    --font-weight-bold: 700;
+    --font-weight-light: 300;
+    /*  Shadows */
+    --shadow-small-size: 1px 1px 6px;
+    --shadow-medium-size: 2px 2px 12px;
+    --shadow-large-size: 3px 3px 18px;
+    --shadow-color: var(--clr-background-5);
+    --shadow-2-color: var(--clr-background-4);
+    --shadow-3-color: var(--clr-background-3);
+    --shadow-4-color: var(--clr-background-2);
+    --shadow-5-color: var(--clr-background-1);
+    --shadow-small: var(--shadow-small-size) var(--shadow-color);
+    --shadow-medium: var(--shadow-medium-size) var(--shadow-color);
+    --shadow-large: var(--shadow-large-size) var(--shadow-color);
+    --shadow-small-2: var(--shadow-small-size) var(--shadow-2-color);
+    --shadow-medium-2: var(--shadow-medium-size) var(--shadow-2-color);
+    --shadow-large-2: var(--shadow-large-size) var(--shadow-2-color);
+    --shadow-small-3: var(--shadow-small-size) var(--shadow-3-color);
+    --shadow-medium-3: var(--shadow-medium-size) var(--shadow-3-color);
+    --shadow-large-3: var(--shadow-large-size) var(--shadow-3-color);
+    --shadow-small-4: var(--shadow-small-size) var(--shadow-4-color);
+    --shadow-medium-4: var(--shadow-medium-size) var(--shadow-4-color);
+    --shadow-large-4: var(--shadow-large-size) var(--shadow-4-color);
+    --shadow-small-5: var(--shadow-small-size) var(--shadow-5-color);
+    --shadow-medium-5: var(--shadow-medium-size) var(--shadow-5-color);
+    --shadow-large-5: var(--shadow-large-size) var(--shadow-5-color);
+
+    /* Dimensions */
+    /* Heights */
+    --base-height: 2.5em;
+    --base-height-small: 2em;
+    --base-height-large: 3em;
+    --button-height: var(--base-height);
+    --button-height-small: var(--base-height-small);
+    --button-height-large: var(--base-height-large);
+    --input-height: var(--base-height);
+    --input-height-small: var(--base-height-small);
+    --input-height-large: var(--base-height-large);
+    /* Widths */
+    --base-width: 80%;
+    --base-width-small: 50%;
+    --base-width-large: 100%;
+    --button-width: 160px;
+    --button-width-small: 120px;
+    --button-width-large: 240px;
+    --input-width: var(--base-width);
+    --input-width-small: 240px;
+    --input-width-large: 480px;
+}
