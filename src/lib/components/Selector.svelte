@@ -8,7 +8,9 @@
     icon = undefined,
     label = undefined,
     small = $bindable(false),
-    vertical = false
+    vertical = false,
+    open = $bindable(false),
+    portal_class = undefined
   } = $props();
 
   //   options: [{ value: string, label?: string }]
@@ -75,6 +77,7 @@
       type="single"
       onValueChange={(v) => (value = v)}
       items={options}
+      bind:open={open}
     >
       <Select.Trigger aria-label={hint} class={small ? "small" : ""}>
         {#if icon}
@@ -89,7 +92,7 @@
         <span class="material-symbols-outlined"> arrow_drop_down </span>
       </Select.Trigger>
       <Select.Portal>
-        <Select.Content sideOffset={10}>
+        <Select.Content sideOffset={10} class={portal_class ? portal_class : 'selector_portal'}>
           <Select.ScrollUpButton>
             <span class="material-symbols-outlined"> arrow_upward </span>
           </Select.ScrollUpButton>

@@ -9,6 +9,8 @@
   import { slide } from "svelte/transition";
   import { appState } from "$lib/jumper.svelte.js";
 
+  import { navigating } from "$app/stores";
+
   let schemes = [
     "nord",
     {
@@ -63,13 +65,15 @@
     if (!window) return false;
     if (window.innerWidth < 600) return true;
     if (/Android|iPhone/i.test(navigator.userAgent)) {
-        return true;
+      return true;
     }
     return false;
   }
 
   $effect(() => {
-    document.getElementsByTagName("body")[0].classList.toggle("mobile", appState.mobile);
+    document
+      .getElementsByTagName("body")[0]
+      .classList.toggle("mobile", appState.mobile);
   });
   onMount(() => {
     window.addEventListener("resize", () => {
@@ -83,36 +87,88 @@
   function toggleSidebar() {
     sidebar_collapsed = !sidebar_collapsed;
   }
-  
+
+  $effect(() => {
+    if ($navigating) {
+        setTimeout(
+            () => {
+                sidebar_collapsed = true;
+            }, 
+        300);
+    }
+  });
+
+  let theme_select_open = $state(false);
+
+  function collapse_sidebar_if_needed(event) {
+    if (!appState.mobile || sidebar_collapsed) {
+        return;
+    }
+    let pos = {x: event.x, y: event.y};
+    let sidebar = document.getElementById('sidebar');
+    let sidebar_bounds = sidebar.getBoundingClientRect();
+    // we can cheat since the sidebar will always be from x=0 and cover all y
+    if (pos.x <= sidebar_bounds.width) {
+        // we clicked inside the sidebar. Do nothing
+    } else {
+        // we clicked outside the sidebar. Collapse, unless the theme selector is open and we clicked in that.
+        // console.log(theme_select_open);
+        // if (theme_select_open) {
+        //     let theme_portal = document.getElementsByClassName('theme_portal')[0];
+        //     if (!theme_portal) {
+        //         sidebar_collapsed = true;
+        //         return;
+        //     }
+        //     let theme_portal_bounds = theme_portal.getBoundingClientRect();
+        //     console.log(pos, {left:theme_portal_bounds.left, right: theme_portal_bounds.right, top: theme_portal_bounds.top, bottom: theme_portal_bounds.bottom});
+        //     if (pos.x < theme_portal_bounds.left || pos.x > theme_portal_bounds.right || pos.y < theme_portal_bounds.top || pos.y > theme_portal_bounds.bottom) {
+        //         sidebar_collapsed = true;
+        //         // theme_select_open = false;
+        //         return;
+        //     }
+        // } else {
+            sidebar_collapsed = true;
+        // }
+    }
+  }
 </script>
 
+<svelte:body onclick={collapse_sidebar_if_needed} />
+
 {#if appState.mobile}
+
+
   <div>
-    <div 
-        id="sidebar" 
-        class:open={!sidebar_collapsed} 
-        transition:slide={{ axis: "x" }}
-        onblur={() => {
-          if (sidebar_collapsed) return;
-          // check the current cursor position. Are we within the sidebar?
-            const rect = document.getElementById("sidebar").getBoundingClientRect();
-            const x = event.clientX;
-            const y = event.clientY;
-            console.log("Cursor position:", x, y);
-            console.log("Sidebar rect:", rect);
-            if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-              // cursor is within the sidebar, do not collapse
-              return;
-            }
-          // cursor is outside the sidebar, collapse it
-          sidebar_collapsed = true;
-        }}
+    <div
+      id="sidebar"
+      class:open={!sidebar_collapsed}
+      transition:slide={{ axis: "x" }}
+      onblur={() => {
+        if (sidebar_collapsed) return;
+        // check the current cursor position. Are we within the sidebar?
+        const rect = document.getElementById("sidebar").getBoundingClientRect();
+        const x = event.clientX;
+        const y = event.clientY;
+        console.log("Cursor position:", x, y);
+        console.log("Sidebar rect:", rect);
+        if (
+          x >= rect.left &&
+          x <= rect.right &&
+          y >= rect.top &&
+          y <= rect.bottom
+        ) {
+          // cursor is within the sidebar, do not collapse
+          return;
+        }
+        // cursor is outside the sidebar, collapse it
+        sidebar_collapsed = true;
+      }}
     >
       <button id="burger" onclick={toggleSidebar}>
         {#if sidebar_collapsed}
-            <span class="material-symbols-outlined">menu</span>
+          <span class="material-symbols-outlined">menu</span>
         {:else}
-            <span class="material-symbols-outlined">close</span>
+          <span class="material-symbols-outlined">close</span>
         {/if}
       </button>
       <div class="navigation" class:small>
@@ -124,12 +180,13 @@
             bind:small={sidebar_collapsed}
           />
         {/each}
-    </div>
-    <span class="separator"></span>
+      </div>
+      <span class="separator"></span>
       <div class="theming">
         <DarkModeToggle bind:darkMode={scheme.dark}></DarkModeToggle>
         {#if !sidebar_collapsed}
-          <ThemeSelect bind:value={scheme.name} bind:small={appState.mobile}></ThemeSelect>
+          <ThemeSelect bind:value={scheme.name} bind:small={appState.mobile} bind:open={theme_select_open}
+          ></ThemeSelect>
         {/if}
       </div>
     </div>
@@ -151,7 +208,7 @@
     </div>
     <div class="theming">
       <DarkModeToggle bind:darkMode={scheme.dark}></DarkModeToggle>
-      <ThemeSelect bind:value={scheme.name} bind:small></ThemeSelect>
+      <ThemeSelect bind:value={scheme.name} bind:small bind:open={theme_select_open}></ThemeSelect>
     </div>
   </div>
 {/if}
@@ -183,76 +240,77 @@
 
   div :global {
     div#sidebar {
-        z-index: 99;
-        view-transition-name: header;
-        background: var(--clr-accent1);
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 2.5em;
-        &:not(.open) {
-            max-width: 20ch;
-        }
+      z-index: 99;
+      view-transition-name: header;
+      background: var(--clr-accent1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 2.5em;
+      &:not(.open) {
+        max-width: 20ch;
+      }
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      justify-content: start;
+      gap: var(--gap-medium);
+      padding: 0.25em;
+      & span.separator {
+        flex-grow: 1;
+      }
+      &.open {
+        width: 80vw;
+        max-width: 3in;
+      }
+      & button#burger {
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--clr-background);
+        margin-top: 1ch;
+      }
+      & .navigation {
         display: flex;
         flex-direction: column;
         align-items: start;
-        justify-content: start;
-        gap: var(--gap-medium);
-        padding: 0.25em;
-        & span.separator {
-            flex-grow: 1;
+        gap: var(--gap-small);
+        width: 100%;
+        align-self: center;
+      }
+      & a.navbutton {
+        text-align: left;
+        overflow-x: hidden;
+        text-wrap: nowrap;
+        text-decoration: none;
+        font-weight: var(--font-weight-bold);
+        color: var(--clr-background);
+        border-left-width: 2px;
+        border-left-style: solid;
+        border-left-color: transparent;
+        border-right-width: 2px;
+        border-right-style: solid;
+        border-right-color: transparent;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: var(--gap-small);
+        padding-left: 0.25em;
+        padding-right: 0.5em;
+        &[enabled="true"] {
+          &:focus,
+          &:focus-within,
+          &:hover {
+            border-left-color: var(--clr-background);
+            border-right-color: var(--clr-background);
+          }
         }
-        &.open {
-            width: 80vw;
+        &.current-page {
+          border-left-color: var(--clr-background);
+          border-right-color: var(--clr-background);
         }
-        & button#burger {
-            background: none;
-            border: none;
-            outline: none;
-            color: var(--clr-background);
-            margin-top: 1ch;
-        }
-        & .navigation {
-            display: flex;
-            flex-direction: column;
-            align-items: start;
-            gap: var(--gap-small);
-            width: 100%;
-            align-self: center;
-        }
-        & a.navbutton {
-            text-align: left;
-            overflow-x: hidden;
-            text-wrap: nowrap;
-            text-decoration: none;
-            font-weight: var(--font-weight-bold);
-            color: var(--clr-background);
-            border-left-width: 2px;
-            border-left-style: solid;
-            border-left-color: transparent;
-            border-right-width: 2px;
-            border-right-style: solid;
-            border-right-color: transparent;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: var(--gap-small);
-            padding-left: 0.25em;
-            padding-right: 0.5em;
-            &[enabled="true"] {
-                &:focus,
-                &:focus-within,
-                &:hover {
-                    border-left-color: var(--clr-background);
-                    border-right-color: var(--clr-background);
-                }
-            }
-            &.current-page {
-                border-left-color: var(--clr-background);
-                border-right-color: var(--clr-background);
-            }
-        }
+      }
     }
   }
 
@@ -336,11 +394,11 @@
       width: 90vw;
     }
     &.mobile {
-        height: 100%;
-    //     overflow-y: auto;
-        margin-inline-start: 6ch;
-        margin-inline-end: 2ch;
-        padding-block-end: 20vh;
+      height: 100%;
+      //     overflow-y: auto;
+      margin-inline-start: 6ch;
+      margin-inline-end: 2ch;
+      padding-block-end: 20vh;
     }
   }
 

@@ -14,7 +14,7 @@
     { value: "wildcherry"}
   ];
 
-  let {value = $bindable("nord"), small = $bindable(false)} = $props();
+  let {value = $bindable("nord"), small = $bindable(false), open=$bindable(false)} = $props();
 
 </script>
  
@@ -25,6 +25,8 @@
         hint="Select a theme"
         icon="palette"
         bind:small = {small}
+        bind:open = {open}
+        portal_class="theme_portal"
     />
 </div>
 

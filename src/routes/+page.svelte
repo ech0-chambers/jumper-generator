@@ -76,7 +76,7 @@
       label: "Body width",
       value: "W",
       tooltip:
-        "Measure around the body at the widest point (bust or waist), then halve the measurement.",
+        "Measure around the body at the widest point (bust, waist or hips for longer jumpers), then halve the measurement.",
     },
     {
       id: "H",

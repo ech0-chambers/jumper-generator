@@ -49,6 +49,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 99;
             &:hover, &:focus {
                 .raised-4();
             }
