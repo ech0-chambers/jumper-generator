@@ -95,6 +95,9 @@ body {
   --input-width: var(--base-width);
   --input-width-small: 240px;
   --input-width-large: 480px;
+
+
+  --ribbon-url: url("ribbon.jpg");
 }
 
 body.mobile {
