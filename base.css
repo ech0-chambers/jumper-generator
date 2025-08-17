@@ -96,8 +96,9 @@ body {
   --input-width-small: 240px;
   --input-width-large: 480px;
 
+/* Not sure why, but this has to be an absolute url, not a relative link, even though it exists. */
+  --ribbon-url: url("https://ech0-chambers.github.io/jumper-generator/ribbon.jpg");
 
-  --ribbon-url: url("ribbon.jpg");
 }
 
 body.mobile {
