@@ -10,7 +10,9 @@
     small = $bindable(false),
     vertical = false,
     open = $bindable(false),
-    portal_class = undefined
+    portal_class = undefined,
+    beforeValueChange = undefined,
+    afterValueChange = undefined
   } = $props();
 
   //   options: [{ value: string, label?: string }]
@@ -75,7 +77,11 @@
     {/if}
     <Select.Root
       type="single"
-      onValueChange={(v) => (value = v)}
+      onValueChange={(v) => {
+        if (beforeValueChange) {beforeValueChange(value, v)}
+        value = v;
+        if (afterValueChange) {afterValueChange(v)}
+    }}
       items={options}
       bind:open={open}
     >

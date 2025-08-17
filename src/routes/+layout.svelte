@@ -7,7 +7,7 @@
   import NavButton from "$lib/components/NavButton.svelte";
   import { Button, Separator } from "bits-ui";
   import { slide } from "svelte/transition";
-  import { appState } from "$lib/jumper.svelte.js";
+  import { appState, load_state_cookie } from "$lib/jumper.svelte.js";
 
   import { navigating } from "$app/stores";
 
@@ -131,6 +131,10 @@
         // }
     }
   }
+
+  onMount(() => {
+    load_state_cookie();
+  });
 </script>
 
 <svelte:body onclick={collapse_sidebar_if_needed} />
@@ -149,8 +153,6 @@
         const rect = document.getElementById("sidebar").getBoundingClientRect();
         const x = event.clientX;
         const y = event.clientY;
-        console.log("Cursor position:", x, y);
-        console.log("Sidebar rect:", rect);
         if (
           x >= rect.left &&
           x <= rect.right &&
@@ -392,6 +394,7 @@
       max-width: 14in;
       margin: auto;
       width: 90vw;
+      padding-block-end: 20vh;
     }
     &.mobile {
       height: 100%;

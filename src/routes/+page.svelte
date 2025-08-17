@@ -5,11 +5,17 @@
     measurements,
     update_derived,
     appState,
+    convert_units,
+    save_state_cookie,
+    load_state_cookie,
+    reset_measurements,
+    reset_settings,
   } from "$lib/jumper.svelte.js";
   import { Coordinate, X, Y, BezierCubic } from "$lib/geometry.js";
   import Card from "$lib/components/Card.svelte";
   import Selector from "$lib/components/Selector.svelte";
-  import { Separator } from "bits-ui";
+  import { Separator, AlertDialog } from "bits-ui";
+  import Confirm from "$lib/components/Confirm.svelte";
 
   let units = {
     in: {
@@ -149,7 +155,25 @@
       value: "neckband_width",
       tooltip: "Width of the finished neckband.",
     },
+    {
+      id: "ease",
+      label: "Ease",
+      value: "ease",
+      tooltip:
+        "The amount of ease to add to certain key dimensions. 0 ease means the garment will be exactly the size of your measurements. A value of 1 or 2 inches is common for a comfortable fit.",
+    },
   ];
+
+  let first_load = $state(true);
+
+  $effect(() => {
+    // save state cookie on change
+    if (first_load) {
+      first_load = false;
+      return;
+    } // Don't save state on first load as we're about to load it from the cookie
+    save_state_cookie();
+  });
 </script>
 
 <h2 class:mobile={appState.mobile}>Measurements</h2>
@@ -159,40 +183,46 @@
     <Card title="Settings">
       <div id="settings">
         {#if appState.mobile}
-        <Selector
-          id="unit"
-          bind:value={measurements.unit}
-          options={unit_options}
-          hint="Select unit"
-          icon="straighten"
-          label="Units"
-          vertical={true}
-          small={true}
-        />
-        <Separator.Root />
-        <Selector
-          id="neckline-type"
-          bind:value={measurements.neckline}
-          options={neckline_types}
-          hint="Select neckline shape"
-          icon="apparel"
-          label="Neckline Shape"
-          vertical={true}
-          small={true}
-        />
-        <Separator.Root />
-        <Selector
-          id="neckband-type"
-          bind:value={measurements.neckband}
-          options={neckband_types}
-          hint="Select neckband type"
-          icon="apparel"
-          label="Neckband Type"
-          vertical={true}
-          small={true}
-        />
-        <Separator.Root />
-        {#each settings_fields as field, i}
+          <Selector
+            id="unit"
+            bind:value={measurements.unit}
+            options={unit_options}
+            hint="Select unit"
+            icon="straighten"
+            label="Units"
+            vertical={true}
+            small={true}
+            beforeValueChange={(oldV, newV) => {
+              if (oldV == newV) {
+                return;
+              }
+              convert_units(newV);
+            }}
+          />
+          <Separator.Root />
+          <Selector
+            id="neckline-type"
+            bind:value={measurements.neckline}
+            options={neckline_types}
+            hint="Select neckline shape"
+            icon="apparel"
+            label="Neckline Shape"
+            vertical={true}
+            small={true}
+          />
+          <Separator.Root />
+          <Selector
+            id="neckband-type"
+            bind:value={measurements.neckband}
+            options={neckband_types}
+            hint="Select neckband type"
+            icon="apparel"
+            label="Neckband Type"
+            vertical={true}
+            small={true}
+          />
+          <Separator.Root />
+          {#each settings_fields as field, i}
             <div class="field-container mobile">
               <label for={field.id}
                 >{field.label.replace(
@@ -215,7 +245,7 @@
                 id={field.id}
                 bind:value={measurements[field.value]}
                 onchange={update_derived}
-                class='mobile'
+                class="mobile"
               />
               <span class="unit">
                 {field.after
@@ -226,7 +256,7 @@
               </span>
             </div>
             {#if i < settings_fields.length - 1}
-                <Separator.Root />
+              <Separator.Root />
             {/if}
           {/each}
         {:else}
@@ -237,6 +267,12 @@
             hint="Select unit"
             icon="straighten"
             label="Units"
+            beforeValueChange={(oldV, newV) => {
+              if (oldV == newV) {
+                return;
+              }
+              convert_units(newV);
+            }}
           />
           <Selector
             id="neckline-type"
@@ -288,6 +324,17 @@
             </div>
           {/each}
         {/if}
+        <Confirm
+          icon="reset_settings"
+          label="Reset Settings"
+          title="Are You Sure?"
+          description="Are you sure you want to reset all settings? This action cannot be undone."
+          cancel_label="Cancel"
+          confirm_label="Reset"
+          on_confirm={() => {
+            reset_settings();
+          }}
+        />
       </div>
     </Card>
     <Card title="Measurements">
@@ -296,39 +343,39 @@
           <!-- <p>Mobile</p> -->
           {#each measurement_fields as field, i}
             <div class="field-container">
-                <label for={field.id}
-                  >{field.label.replace(
+              <label for={field.id}
+                >{field.label.replace(
+                  "~unit~",
+                  units[measurements.unit].name
+                )}</label
+              >
+              {#if field.tooltip}
+                <Help
+                  tooltip={field.tooltip.replace(
                     "~unit~",
                     units[measurements.unit].name
-                  )}</label
-                >
-                {#if field.tooltip}
-                  <Help
-                    tooltip={field.tooltip.replace(
-                      "~unit~",
-                      units[measurements.unit].name
-                    )}
-                  />
-                {:else}
-                  <span></span>
-                {/if}
-                <input
-                  type="number"
-                  id={field.id}
-                  bind:value={measurements[field.value]}
-                  onchange={update_derived}
-                  class='mobile'
+                  )}
                 />
-                <span class="unit">
-                  {field.after
-                    ? field.after
-                    : field.inverse
-                      ? units[measurements.unit].inverse
-                      : units[measurements.unit].symbol}
-                </span>
+              {:else}
+                <span></span>
+              {/if}
+              <input
+                type="number"
+                id={field.id}
+                bind:value={measurements[field.value]}
+                onchange={update_derived}
+                class="mobile"
+              />
+              <span class="unit">
+                {field.after
+                  ? field.after
+                  : field.inverse
+                    ? units[measurements.unit].inverse
+                    : units[measurements.unit].symbol}
+              </span>
             </div>
             {#if i < measurement_fields.length - 1}
-                <Separator.Root />
+              <Separator.Root />
             {/if}
           {/each}
         {:else}
@@ -365,6 +412,18 @@
           {/each}
         {/if}
       </div>
+
+      <Confirm
+        icon="reset_settings"
+        label="Reset Measurements"
+        title="Are You Sure?"
+        description="Are you sure you want to reset all measurements? This action cannot be undone."
+        cancel_label="Cancel"
+        confirm_label="Reset"
+        on_confirm={() => {
+          reset_measurements();
+        }}
+      />
     </Card>
   </div>
 </div>
@@ -385,6 +444,7 @@
       grid-template-columns: 25ch 7ch 7ch 5ch;
       gap: var(--gap-medium);
       align-items: center;
+      margin-bottom: var(--gap-medium);
     }
     div#measurements.mobile {
       display: flex;
@@ -396,6 +456,7 @@
         gap: var(--gap-small);
         align-items: start;
       }
+      margin-bottom: var(--gap-medium);
     }
     div#settings {
       display: flex;
@@ -444,14 +505,14 @@
     .card {
       width: fit-content;
       box-sizing: border-box;
-    //   flex: 1;
+      //   flex: 1;
     }
 
     [data-separator-root] {
-        width: 80%;
-        height: 0;
-        border-bottom: 1px solid var(--clr-foreground-5);
-        margin-inline: auto;
+      width: 80%;
+      height: 0;
+      border-bottom: 1px solid var(--clr-foreground-5);
+      margin-inline: auto;
     }
   }
 </style>

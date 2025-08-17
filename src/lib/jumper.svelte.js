@@ -1,7 +1,8 @@
 import {Coordinate, BezierCubic} from './geometry.js';
 
+const in_to_cm = 2.54;
 
-const measurements = $state({
+const default_measurements = {
     A_c: 23,
     W_sl: 16,
     W_w: 9,
@@ -20,8 +21,11 @@ const measurements = $state({
     neckline: "round",
     neckband: "folded",
     neckband_width: 2,
+    ease: 1,
     unit: "in",
-});
+};
+
+const measurements = $state(default_measurements);
 
 function calc_cap_height() {
     let upper_height = Math.sqrt(measurements.A_c ** 2 - measurements.W_sl ** 2) / 2;
@@ -63,4 +67,126 @@ function update_derived() {
 update_derived();
 const appState = $state({mobile: false});
 
-export { measurements, update_derived, appState };
+function convert_units(new_unit) {
+    let to_convert = [
+        "A_c",
+        "W_sl",
+        "W_w",
+        "H_Cap",
+        "H_sl",
+        "H_rib",
+        "W",
+        "W_s",
+        "H",
+        "W_n",
+        "H_n",
+        "H_nb",
+        "neckband_width",
+        "ease"
+    ];
+    let to_convert_inverse = [
+        "st_per_inch",
+        "row_per_inch",
+        "row_per_inch_rib"
+    ];
+    if (new_unit == measurements.unit) {
+        return;
+    }
+    if (new_unit == 'in') {
+        to_convert.forEach((k) => {measurements[k] = Math.round(measurements[k] / in_to_cm * 100) / 100});
+        to_convert_inverse.forEach((k) => {measurements[k] = Math.round(measurements[k] * in_to_cm * 100) / 100});
+    } else if (new_unit = 'cm') {
+        to_convert.forEach((k) => {measurements[k] = Math.round(measurements[k] * in_to_cm * 100) / 100});
+        to_convert_inverse.forEach((k) => {measurements[k] = Math.round(measurements[k] / in_to_cm * 100) / 100});
+    } else {
+        console.warn(`Unexpected unit: ${new_unit}\nUnable to convert.`)
+    }
+}
+
+function set_cookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        let date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}
+
+function get_cookie(name) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+function save_state_cookie() {
+    // just need measurements, not appState unless things change
+    set_cookie("jumper_measurements", JSON.stringify(measurements), 30);
+    console.log("State saved to cookie.");
+}
+
+function load_state_cookie() {
+    let state = get_cookie("jumper_measurements");
+    console.log(state);
+    if (state) {
+        try {
+            let parsed = JSON.parse(state);
+            console.log("Loaded state from cookie:", parsed);
+            Object.keys(parsed).forEach((k) => {
+                if (measurements.hasOwnProperty(k)) {
+                    measurements[k] = parsed[k];
+                }
+            });
+        } catch (e) {
+            console.error("Failed to parse saved state:", e);
+        }
+    }
+    update_derived();
+}
+
+function reset_measurements() {
+    let to_reset = [
+        "A_c",
+        "W_sl",
+        "W_w",
+        "H_Cap",
+        "H_sl",
+        "H_rib",
+        "W",
+        "W_s",
+        "H",
+        "W_n",
+        "H_n",
+        "H_nb",
+        "neckband_width",
+        "ease"
+    ];
+    to_reset.forEach((k) => {
+        measurements[k] = default_measurements[k];
+    });
+    update_derived();
+    save_state_cookie();
+}
+
+function reset_settings() {
+    let to_reset = [
+        "st_per_inch",
+        "row_per_inch",
+        "row_per_inch_rib",
+        "neckline",
+        "neckband",
+        "unit"
+    ];
+    to_reset.forEach((k) => {
+        measurements[k] = default_measurements[k];
+    });
+    update_derived();
+    save_state_cookie();
+}
+
+export { measurements, update_derived, appState, convert_units, save_state_cookie, load_state_cookie, reset_measurements, reset_settings };
