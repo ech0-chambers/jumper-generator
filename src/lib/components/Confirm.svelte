@@ -10,6 +10,7 @@
     description = "This action cannot be undone.",
     cancel_label = "Cancel",
     confirm_label = "Confirm",
+    mobile = $bindable(false),
   } = $props();
   let isOpen = $state(false);
 </script>
@@ -32,14 +33,14 @@
           {/if}
         {/snippet}
       </AlertDialog.Overlay>
-      <AlertDialog.Content>
+      <AlertDialog.Content class={mobile ? "mobile" : ""} >
         <div>
           <AlertDialog.Title><div class="h3">{title}</div></AlertDialog.Title>
           <AlertDialog.Description>
             {description}
           </AlertDialog.Description>
         </div>
-        <div class="actions">
+        <div class="actions" class:mobile>
           <AlertDialog.Cancel>
             {cancel_label}
           </AlertDialog.Cancel>
@@ -86,24 +87,34 @@
   }
 
   div.actions {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--gap-small);
+    &:not(.mobile) {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--gap-small);
+        padding-inline: var(--gap-large);
+    }
+    &.mobile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--gap-small);
+        width: 100%;
+        padding-inline: 0;
+    }
     margin-top: var(--gap-medium);
-    padding-inline: var(--gap-large);
     & :global(button) {
       padding-block: var(--gap-small);
       padding-inline: var(--gap-medium);
       font-size: var(--font-size-medium);
       font-family: var(--font-family-main);
       font-weight: var(--font-weight-bold);
-      width: 30%;
+      width: 25%;
       border: none;
       outline: none;
       color: var(--clr-foreground);
       &:first-of-type {
         --r: 0.8em; /* control the cutout */
-
+        padding-inline-end: var(--gap-large);
         border-block: 0.5em solid #0000;
         line-height: 1.8;
         clip-path: polygon(
@@ -115,6 +126,7 @@
           100% 50%,
           calc(100% - var(--r)) 0.25em
         );
+        background-blend-mode: color-burn;
         background:
           radial-gradient(
               0.3em 50% at left,
@@ -122,12 +134,14 @@
               #0000
             )
             border-box,
+            var(--ribbon-url) padding-box  right,
           var(--clr-background-2) padding-box; /* the color  */
         outline: none;
-        text-align: left;
+        text-align: right;
         &:hover,
         &:focus {
           width: 40%;
+        //   padding-left: calc(var(--gap-medium) + 20%);
           background:
             radial-gradient(
                 0.3em 50% at left,
@@ -135,13 +149,14 @@
                 #0000
               )
               border-box,
-            var(--clr-blue-4) padding-box; /* the color  */
+              var(--ribbon-url) padding-box  right,
+            var(--clr-background-2) padding-box; /* the color  */
         }
       }
       &:last-of-type {
         --r: 0.8em; /* control the cutout */
+        padding-inline-start: var(--gap-large);
         border-block: 0.5em solid #0000;
-        padding-inline: calc(var(--r) + 0.25em) 0.5em;
         line-height: 1.8;
         clip-path: polygon(
           0 0,
@@ -152,6 +167,7 @@
           var(--r) 50%,
           0 0.25em
         );
+        background-blend-mode: color-burn;
         background:
           radial-gradient(
               0.3em 50% at right,
@@ -159,7 +175,9 @@
               #0000
             )
             border-box,
+            var(--ribbon-url) padding-box,
           var(--clr-error-4) padding-box; /* the color  */
+        text-align: left;
         &:hover,
         &:focus {
           width: 40%;
@@ -170,9 +188,23 @@
                 #0000
               )
               border-box,
+              var(--ribbon-url) padding-box,
             var(--clr-error-3) padding-box; /* the color  */
         }
       }
+    }
+    &.mobile :global(button) {
+        width: 60%;
+        &:first-of-type {
+            align-self: start;
+        }
+        &:last-of-type {
+            align-self: end;
+        }
+        &:hover,
+        &:focus {
+          width: 80%;
+        }
     }
   }
 
@@ -188,18 +220,28 @@
   }
 
   :global([data-alert-dialog-content]) {
-    background: var(--clr-background);
     color: var(--clr-foreground);
     border-radius: 0px;
-    padding: var(--gap-small);
-    box-shadow: 0.25em 0.25em var(--clr-accent3-5);
-    border: 1px solid var(--clr-accent3-5);
     z-index: 1001;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    padding: var(--gap-medium);
+    padding-top: 4.5em;
+    width: fit-content;
+    background-color: var(--clr-background-5);
+    box-shadow: 0.5em 0.5em var(--clr-blue-4);
+    border: 1px solid var(--clr-background-2);
   }
+
+  :global([data-alert-dialog-content].mobile) {
+    width: 70vw;
+    max-width: 500px;
+    height: fit-content;
+  }
+
+
 
   :global([data-alert-dialog-title]) {
     & div.h3 {
@@ -228,14 +270,5 @@
       calc(100% - var(--r)) calc(50% - var(--f) / 2),
       100% 0
     );
-  }
-
-  :global([data-alert-dialog-content]) {
-    padding: var(--gap-medium);
-    padding-top: 4.5em;
-    width: fit-content;
-    background-color: var(--clr-background-5);
-    box-shadow: 0.5em 0.5em var(--clr-blue-4);
-    border: 1px solid var(--clr-background-2);
   }
 </style>

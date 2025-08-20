@@ -331,6 +331,7 @@
           description="Are you sure you want to reset all settings? This action cannot be undone."
           cancel_label="Cancel"
           confirm_label="Reset"
+          bind:mobile={appState.mobile}
           on_confirm={() => {
             reset_settings();
           }}
@@ -420,6 +421,7 @@
         description="Are you sure you want to reset all measurements? This action cannot be undone."
         cancel_label="Cancel"
         confirm_label="Reset"
+        bind:mobile={appState.mobile}
         on_confirm={() => {
           reset_measurements();
         }}
@@ -430,6 +432,10 @@
 
 <style lang="less">
   div :global {
+    #alert-dialog-container {
+      flex-grow: 1;
+      align-items: end;
+    }
     div.measurements-container {
       display: flex;
       flex-direction: row;
@@ -462,6 +468,7 @@
       display: flex;
       flex-direction: column;
       gap: var(--gap-medium);
+      height: 100%;
       & .selector-container:not(.selector-vertical) {
         display: grid;
         grid-template-columns: 25ch 1fr;

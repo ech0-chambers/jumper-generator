@@ -65,7 +65,7 @@ function update_derived() {
 }
 
 update_derived();
-const appState = $state({mobile: false});
+const appState = $state({mobile: false, theme: "nord", dark: false});
 
 function convert_units(new_unit) {
     let to_convert = [
@@ -125,17 +125,18 @@ function get_cookie(name) {
 }
 
 function save_state_cookie() {
-    // just need measurements, not appState unless things change
+    // just need measurements
     set_cookie("jumper_measurements", JSON.stringify(measurements), 30);
+    set_cookie("jumper_app_state", JSON.stringify(appState), 30);
     console.log("State saved to cookie.");
 }
 
 function load_state_cookie() {
-    let state = get_cookie("jumper_measurements");
-    console.log(state);
-    if (state) {
+    let measurements_cookie = get_cookie("jumper_measurements");
+    console.log(measurements_cookie);
+    if (measurements_cookie) {
         try {
-            let parsed = JSON.parse(state);
+            let parsed = JSON.parse(measurements_cookie);
             console.log("Loaded state from cookie:", parsed);
             Object.keys(parsed).forEach((k) => {
                 if (measurements.hasOwnProperty(k)) {
@@ -146,6 +147,21 @@ function load_state_cookie() {
             console.error("Failed to parse saved state:", e);
         }
     }
+    let app_state_cookie = get_cookie("jumper_app_state");
+    if (app_state_cookie) {
+        try {
+            let parsed = JSON.parse(app_state_cookie);
+            console.log("Loaded app state from cookie:", parsed);
+            Object.keys(parsed).forEach((k) => {
+                if (appState.hasOwnProperty(k)) {
+                    appState[k] = parsed[k];
+                }
+            });
+        } catch (e) {
+            console.error("Failed to parse app state:", e);
+        }
+    }
+    console.log("State loaded from cookie.");
     update_derived();
 }
 

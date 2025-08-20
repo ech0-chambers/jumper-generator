@@ -57,4 +57,7 @@
       100% 0
     );
   }
+  .card-content {
+    height: 100%;
+  }
 </style>

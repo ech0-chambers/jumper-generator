@@ -185,9 +185,9 @@
       </div>
       <span class="separator"></span>
       <div class="theming">
-        <DarkModeToggle bind:darkMode={scheme.dark}></DarkModeToggle>
+        <DarkModeToggle bind:darkMode={appState.dark}></DarkModeToggle>
         {#if !sidebar_collapsed}
-          <ThemeSelect bind:value={scheme.name} bind:small={appState.mobile} bind:open={theme_select_open}
+          <ThemeSelect bind:value={appState.theme} bind:small={appState.mobile} bind:open={theme_select_open}
           ></ThemeSelect>
         {/if}
       </div>
@@ -209,8 +209,8 @@
       {/each}
     </div>
     <div class="theming">
-      <DarkModeToggle bind:darkMode={scheme.dark}></DarkModeToggle>
-      <ThemeSelect bind:value={scheme.name} bind:small bind:open={theme_select_open}></ThemeSelect>
+      <DarkModeToggle bind:darkMode={appState.dark}></DarkModeToggle>
+      <ThemeSelect bind:value={appState.theme} bind:small bind:open={theme_select_open}></ThemeSelect>
     </div>
   </div>
 {/if}
@@ -227,7 +227,7 @@
   <link
     rel="stylesheet"
     type="text/css"
-    href="themes/{scheme.name}_{scheme.dark ? 'dark' : 'light'}.css"
+    href="themes/{appState.theme}_{appState.dark ? 'dark' : 'light'}.css"
   />
 </svelte:head>
 
@@ -412,8 +412,8 @@
 
     ::-webkit-scrollbar-thumb {
       background: var(--clr-accent1-4);
-      border-radius: var(--border-radius-small);
-      transition: 0.3s;
+      border-radius: 0;
+      transition: background-color 0.3s;
       &:hover {
         background-color: var(--clr-accent1-3);
         box-shadow: inset var(--shadow-small-size) var(--clr-accent1);
@@ -422,8 +422,9 @@
 
     ::-webkit-scrollbar-track {
       background: var(--clr-background-5);
-      border-radius: var(--border-radius-small);
+      border-radius: 0;
       box-shadow: inset var(--shadow-small-size) var(--clr-background-3);
+    // box-shadow: 0.125em 0.125em var(--clr-background-4);
     }
   }
 
