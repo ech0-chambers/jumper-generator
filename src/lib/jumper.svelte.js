@@ -67,7 +67,7 @@ function update_derived() {
 update_derived();
 const appState = $state({mobile: false, theme: "nord", dark: false});
 
-function convert_units(new_unit) {
+function convert_units(new_unit, force = false) {
     let to_convert = [
         "A_c",
         "W_sl",
@@ -89,7 +89,7 @@ function convert_units(new_unit) {
         "row_per_inch",
         "row_per_inch_rib"
     ];
-    if (new_unit == measurements.unit) {
+    if (new_unit == measurements.unit && !force) {
         return;
     }
     if (new_unit == 'in') {
@@ -128,16 +128,13 @@ function save_state_cookie() {
     // just need measurements
     set_cookie("jumper_measurements", JSON.stringify(measurements), 30);
     set_cookie("jumper_app_state", JSON.stringify(appState), 30);
-    console.log("State saved to cookie.");
 }
 
 function load_state_cookie() {
     let measurements_cookie = get_cookie("jumper_measurements");
-    console.log(measurements_cookie);
     if (measurements_cookie) {
         try {
             let parsed = JSON.parse(measurements_cookie);
-            console.log("Loaded state from cookie:", parsed);
             Object.keys(parsed).forEach((k) => {
                 if (measurements.hasOwnProperty(k)) {
                     measurements[k] = parsed[k];
@@ -151,7 +148,6 @@ function load_state_cookie() {
     if (app_state_cookie) {
         try {
             let parsed = JSON.parse(app_state_cookie);
-            console.log("Loaded app state from cookie:", parsed);
             Object.keys(parsed).forEach((k) => {
                 if (appState.hasOwnProperty(k)) {
                     appState[k] = parsed[k];
@@ -161,7 +157,6 @@ function load_state_cookie() {
             console.error("Failed to parse app state:", e);
         }
     }
-    console.log("State loaded from cookie.");
     update_derived();
 }
 
@@ -185,6 +180,9 @@ function reset_measurements() {
     to_reset.forEach((k) => {
         measurements[k] = default_measurements[k];
     });
+    if (measurements.unit == "cm") {
+        convert_units("cm", true);
+    }
     update_derived();
     save_state_cookie();
 }
@@ -198,6 +196,9 @@ function reset_settings() {
         "neckband",
         "unit"
     ];
+    if (measurements.unit != default_measurements.unit) { // Do this first so that we can convert the measurements without accidentally converting the stitches per in etc twice.
+        convert_units(default_measurements.unit, true);
+    }
     to_reset.forEach((k) => {
         measurements[k] = default_measurements[k];
     });
